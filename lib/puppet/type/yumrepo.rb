@@ -16,10 +16,10 @@ Puppet::Type.newtype(:yumrepo) do
   # Ensure yumrepos can be removed too.
   ensurable
   # Doc string for properties that can be made 'absent'
-  ABSENT_DOC="Set this to `absent` to remove it from the file completely."
+  ABSENT_DOC = 'Set this to `absent` to remove it from the file completely.'.freeze
   # False can be false/0/no and True can be true/1/yes in yum.
-  YUM_BOOLEAN=/^(true|false|0|1|no|yes)$/
-  YUM_BOOLEAN_DOC="Valid values are: false/0/no or true/1/yes."
+  YUM_BOOLEAN = %r{^(true|false|0|1|no|yes)$}
+  YUM_BOOLEAN_DOC = 'Valid values are: false/0/no or true/1/yes.'.freeze
 
   # Common munge logic for YUM_BOOLEAN values. Munges for two requirements:
   # 1) Because of how regex validation works in Puppet::Parameter::Value,
@@ -27,19 +27,19 @@ Puppet::Type.newtype(:yumrepo) do
   # if the user specified false (or true), they meant False (or True).
   # 2) In order for parameter removal to work correctly, when absent is passed
   # as a string it needs to be munged back to a symbol.
-  munge_yum_bool = Proc.new do |val|
-    val.to_s == 'absent' ? :absent : val.to_s.capitalize
+  munge_yum_bool = proc do |val|
+    (val.to_s == 'absent') ? :absent : val.to_s.capitalize
   end
 
-  VALID_SCHEMES = %w[file http https ftp]
+  VALID_SCHEMES = ['file', 'http', 'https', 'ftp'].freeze
 
-  newparam(:name, :namevar => true) do
+  newparam(:name, namevar: true) do
     desc "The name of the repository.  This corresponds to the
      `repositoryid` parameter in `yum.conf(5)`."
   end
 
   newparam(:target) do
-    desc "The target parameter will be enabled in a future release and should not be used."
+    desc 'The target parameter will be enabled in a future release and should not be used.'
 
     defaultto :absent
   end
@@ -49,20 +49,20 @@ Puppet::Type.newtype(:yumrepo) do
       This corresponds to the name parameter in `yum.conf(5)`.
       #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:mirrorlist) do
     desc "The URL that holds the list of mirrors for this repository.
       #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s == 'absent'
       parsed = URI.parse(value)
 
       unless VALID_SCHEMES.include?(parsed.scheme)
-        raise _("Must be a valid URL")
+        raise _('Must be a valid URL')
       end
     end
   end
@@ -70,16 +70,15 @@ Puppet::Type.newtype(:yumrepo) do
   newproperty(:baseurl) do
     desc "The URL for this repository. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s == 'absent'
 
-      value.split(/\s+/).each do |uri|
-
+      value.split(%r{\s+}).each do |uri|
         parsed = URI.parse(uri)
 
         unless VALID_SCHEMES.include?(parsed.scheme)
-          raise _("Must be a valid URL")
+          raise _('Must be a valid URL')
         end
       end
     end
@@ -126,16 +125,15 @@ Puppet::Type.newtype(:yumrepo) do
     desc "The URL for the GPG key with which packages from this
       repository are signed. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s == 'absent'
 
-      value.split(/\s+/).each do |uri|
-
+      value.split(%r{\s+}).each do |uri|
         parsed = URI.parse(uri)
 
         unless VALID_SCHEMES.include?(parsed.scheme)
-          raise _("Must be a valid URL")
+          raise _('Must be a valid URL')
         end
       end
     end
@@ -145,7 +143,7 @@ Puppet::Type.newtype(:yumrepo) do
     desc "Time (in seconds) after which the mirrorlist locally cached
       will expire.\n#{ABSENT_DOC}"
 
-    newvalues(/^[0-9]+$/, :absent)
+    newvalues(%r{^[0-9]+$}, :absent)
   end
 
   newproperty(:include) do
@@ -153,13 +151,13 @@ Puppet::Type.newtype(:yumrepo) do
       settings. Puppet does not check for this file's existence or validity.
       #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s == 'absent'
       parsed = URI.parse(value)
 
       unless VALID_SCHEMES.include?(parsed.scheme)
-        raise _("Must be a valid URL")
+        raise _('Must be a valid URL')
       end
     end
   end
@@ -170,19 +168,19 @@ Puppet::Type.newtype(:yumrepo) do
       considered in updates or installs for this repo.
       #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:gpgcakey) do
     desc "The URL for the GPG CA key for this repository. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s == 'absent'
       parsed = URI.parse(value)
 
       unless VALID_SCHEMES.include?(parsed.scheme)
-        raise _("Must be a valid URL")
+        raise _('Must be a valid URL')
       end
     end
   end
@@ -193,7 +191,7 @@ Puppet::Type.newtype(:yumrepo) do
       names or shell globs will be considered for update or install
       from this repository. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:enablegroups) do
@@ -210,7 +208,7 @@ Puppet::Type.newtype(:yumrepo) do
     desc "The failover method for this repository; should be either
       `roundrobin` or `priority`. #{ABSENT_DOC}"
 
-    newvalues(/^roundrobin|priority$/, :absent)
+    newvalues(%r{^roundrobin|priority$}, :absent)
   end
 
   newproperty(:keepalive) do
@@ -227,27 +225,27 @@ Puppet::Type.newtype(:yumrepo) do
       retry before returning an error. Setting this to `0` makes yum
      try forever.\n#{ABSENT_DOC}"
 
-    newvalues(/^[0-9]+$/, :absent)
+    newvalues(%r{^[0-9]+$}, :absent)
   end
 
   newproperty(:http_caching) do
     desc "What to cache from this repository. #{ABSENT_DOC}"
 
-    newvalues(/^(packages|all|none)$/, :absent)
+    newvalues(%r{^(packages|all|none)$}, :absent)
   end
 
   newproperty(:timeout) do
     desc "Number of seconds to wait for a connection before timing
       out. #{ABSENT_DOC}"
 
-    newvalues(/^\d+$/, :absent)
+    newvalues(%r{^\d+$}, :absent)
   end
 
   newproperty(:metadata_expire) do
     desc "Number of seconds after which the metadata will expire.
       #{ABSENT_DOC}"
 
-    newvalues(/^([0-9]+[dhm]?|never)$/, :absent)
+    newvalues(%r{^([0-9]+[dhm]?|never)$}, :absent)
   end
 
   newproperty(:protect) do
@@ -266,7 +264,7 @@ Puppet::Type.newtype(:yumrepo) do
       is installed and enabled.
       #{ABSENT_DOC}"
 
-    newvalues(/^-?\d+$/, :absent)
+    newvalues(%r{^-?\d+$}, :absent)
   end
 
   newproperty(:throttle) do
@@ -275,7 +273,7 @@ Puppet::Type.newtype(:yumrepo) do
       percentage `60%`. An SI prefix (k, M or G) may be appended
       to the data rate values.\n#{ABSENT_DOC}"
 
-    newvalues(/^\d+[kMG%]?$/, :absent)
+    newvalues(%r{^\d+[kMG%]?$}, :absent)
   end
 
   newproperty(:bandwidth) do
@@ -285,13 +283,13 @@ Puppet::Type.newtype(:yumrepo) do
       will be disabled. If `throttle` is expressed as a data rate then
       this option is ignored.\n#{ABSENT_DOC}"
 
-    newvalues(/^\d+[kMG]?$/, :absent)
+    newvalues(%r{^\d+[kMG]?$}, :absent)
   end
 
   newproperty(:cost) do
     desc "Cost of this repository. #{ABSENT_DOC}"
 
-    newvalues(/^\d+$/, :absent)
+    newvalues(%r{^\d+$}, :absent)
   end
 
   newproperty(:proxy) do
@@ -300,13 +298,13 @@ Puppet::Type.newtype(:yumrepo) do
       global proxy settings when accessing this repository.
       #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
-      next if value.to_s =~ /^(absent|_none_)$/
+      next if value.to_s =~ %r{^(absent|_none_)$}
       parsed = URI.parse(value)
 
       unless VALID_SCHEMES.include?(parsed.scheme)
-        raise _("Must be a valid URL")
+        raise _('Must be a valid URL')
       end
     end
   end
@@ -314,13 +312,13 @@ Puppet::Type.newtype(:yumrepo) do
   newproperty(:proxy_username) do
     desc "Username for this proxy. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:proxy_password) do
     desc "Password for this proxy. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
 
     sensitive true
   end
@@ -339,7 +337,7 @@ Puppet::Type.newtype(:yumrepo) do
       certificate authorities yum should use to verify SSL certificates.
       #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:sslverify) do
@@ -355,26 +353,26 @@ Puppet::Type.newtype(:yumrepo) do
     desc "Path  to the SSL client certificate yum should use to connect
       to repositories/remote sites. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:sslclientkey) do
     desc "Path to the SSL client key yum should use to connect
       to repositories/remote sites. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:metalink) do
     desc "Metalink for mirrors. #{ABSENT_DOC}"
 
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s == 'absent'
       parsed = URI.parse(value)
 
       unless VALID_SCHEMES.include?(parsed.scheme)
-        raise _("Must be a valid URL")
+        raise _('Must be a valid URL')
       end
     end
   end
@@ -403,7 +401,7 @@ Puppet::Type.newtype(:yumrepo) do
       delta is not used.
       #{ABSENT_DOC}"
 
-    newvalues(/^\d+$/, :absent)
+    newvalues(%r{^\d+$}, :absent)
   end
 
   newproperty(:deltarpm_metadata_percentage) do
@@ -412,19 +410,19 @@ Puppet::Type.newtype(:yumrepo) do
       package, deltarpm metadata is not downloaded.
       #{ABSENT_DOC}"
 
-    newvalues(/^\d+$/, :absent)
+    newvalues(%r{^\d+$}, :absent)
   end
 
   newproperty(:username) do
     desc "Username to use for basic authentication to a repo or really any url.
       #{ABSENT_DOC}"
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
   end
 
   newproperty(:password) do
     desc "Password to use with the username for basic authentication.
       #{ABSENT_DOC}"
-    newvalues(/.*/, :absent)
+    newvalues(%r{.*}, :absent)
     sensitive true
   end
 end

@@ -33,9 +33,9 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
 
     virtual_inifile.each_section do |section|
       # Ignore the 'main' section in yum.conf since it's not a repository.
-      next if section.name == "main"
+      next if section.name == 'main'
 
-      attributes_hash = {:name => section.name, :ensure => :present, :provider => :yumrepo}
+      attributes_hash = { name: section.name, ensure: :present, provider: :yumrepo }
 
       section.entries.each do |key, value|
         key = key.to_sym
@@ -71,13 +71,13 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @param conf [String] Configuration file to look for directories in.
   # @param dirs [Array<String>] Default locations for yum repos.
   # @return [Array<String>] All present directories that may contain yum repo configs.
-  def self.reposdir(conf='/etc/yum.conf', dirs=['/etc/yum.repos.d', '/etc/yum/repos.d'])
+  def self.reposdir(conf = '/etc/yum.conf', dirs = ['/etc/yum.repos.d', '/etc/yum/repos.d'])
     reposdir = find_conf_value('reposdir', conf)
     # Use directories in reposdir if they are set instead of default
     if reposdir
       # Follow the code from the yum/config.py
-      reposdir.gsub!("\n", ' ')
-      reposdir.gsub!(',', ' ')
+      reposdir.tr!("\n", ' ')
+      reposdir.tr!(',', ' ')
       dirs = reposdir.split
     end
     dirs.select! { |dir| Puppet::FileSystem.exist?(dir) }
@@ -100,7 +100,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @param value [String] Value to look for in the configuration file.
   # @param conf [String] Configuration file to check for value.
   # @return [String] The value of a looked up key from the configuration file.
-  def self.find_conf_value(value, conf='/etc/yum.conf')
+  def self.find_conf_value(value, conf = '/etc/yum.conf')
     if Puppet::FileSystem.exist?(conf)
       file = Puppet::Util::IniConfig::PhysicalFile.new(conf)
       file.read
@@ -116,7 +116,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @api private
   # @return [Array<String>
   def self.repofiles
-    files = ["/etc/yum.conf"]
+    files = ['/etc/yum.conf']
     reposdir.each do |dir|
       Dir.glob("#{dir}/*.repo").each do |file|
         files << file
@@ -134,11 +134,11 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   def self.virtual_inifile
     unless @virtual
       @virtual = Puppet::Util::IniConfig::File.new
-      self.repofiles.each do |file|
+      repofiles.each do |file|
         @virtual.read(file) if Puppet::FileSystem.file?(file)
       end
     end
-    return @virtual
+    @virtual
   end
 
   # Is the given key a valid type property?
@@ -161,11 +161,11 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @param name [String] Section name to lookup in the virtual inifile.
   # @return [Puppet::Util::IniConfig] The IniConfig section
   def self.section(name)
-    result = self.virtual_inifile[name]
+    result = virtual_inifile[name]
     # Create a new section if not found.
     unless result
       path = getRepoPath(name)
-      result = self.virtual_inifile.add_section(name, path)
+      result = virtual_inifile.add_section(name, path)
     end
     result
   end
@@ -174,31 +174,30 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @api private
   # @return [void]
   def self.store(resource)
-    inifile = self.virtual_inifile
+    inifile = virtual_inifile
     inifile.store
 
-    target_mode = 0644
+    target_mode = 0o644
     inifile.each_file do |file|
       next unless Puppet::FileSystem.exist?(file)
-      current_mode = Puppet::FileSystem.stat(file).mode & 0777
-      unless current_mode == target_mode
-        resource.info _("changing mode of %{file} from %{current_mode} to %{target_mode}") %
-                          { file: file, current_mode: "%03o" % current_mode, target_mode: "%03o" % target_mode }
-        Puppet::FileSystem.chmod(target_mode, file)
-      end
+      current_mode = Puppet::FileSystem.stat(file).mode & 0o777
+      next if current_mode == target_mode
+      resource.info _('changing mode of %{file} from %{current_mode} to %{target_mode}') %
+                    { file: file, current_mode: '%03o' % current_mode, target_mode: '%03o' % target_mode }
+      Puppet::FileSystem.chmod(target_mode, file)
     end
   end
 
   def self.getRepoPath(name)
-    dirs = reposdir()
-    if dirs.empty?
-      # If no repo directories are present, default to using yum.conf.
-      path = '/etc/yum.conf'
-    else
-      # The ordering of reposdir is [defaults, custom], and we want to use
-      # the custom directory if present.
-      path = File.join(dirs.last, "#{name}.repo")
-    end
+    dirs = reposdir
+    path = if dirs.empty?
+             # If no repo directories are present, default to using yum.conf.
+             '/etc/yum.conf'
+           else
+             # The ordering of reposdir is [defaults, custom], and we want to use
+             # the custom directory if present.
+             File.join(dirs.last, "#{name}.repo")
+           end
     path
   end
 
@@ -224,7 +223,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
       next if property == :ensure
 
       if value = @resource.should(property)
-        self.send("#{property}=", value)
+        send("#{property}=", value)
       end
     end
   end
@@ -246,7 +245,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @return [void]
   def destroy
     # Flag file for deletion on flush.
-    current_section.destroy=(true)
+    current_section.destroy = true
 
     @property_hash.clear
   end
@@ -276,7 +275,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
 
   # Map the yumrepo 'descr' type property to the 'name' INI property.
   def descr
-    if ! @property_hash.has_key?(:descr)
+    unless @property_hash.key?(:descr)
       @property_hash[:descr] = current_section['name']
     end
     value = @property_hash[:descr]
@@ -284,7 +283,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   end
 
   def descr=(value)
-    value = (value == :absent ? nil : value)
+    value = ((value == :absent) ? nil : value)
     current_section['name'] = value
     @property_hash[:descr] = value
   end
@@ -292,7 +291,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   private
 
   def get_property(property)
-    if ! @property_hash.has_key?(property)
+    unless @property_hash.key?(property)
       @property_hash[property] = current_section[property.to_s]
     end
     value = @property_hash[property]
@@ -300,7 +299,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   end
 
   def set_property(property, value)
-    value = (value == :absent ? nil : value)
+    value = ((value == :absent) ? nil : value)
     current_section[property.to_s] = value
     @property_hash[property] = value
   end
@@ -310,6 +309,6 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   end
 
   def current_section
-    self.class.section(self.name)
+    self.class.section(name)
   end
 end
