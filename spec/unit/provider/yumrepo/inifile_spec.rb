@@ -87,7 +87,7 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
       virtual_inifile.expects(:each_section).multiple_yields(main_section, updates_section)
 
       instances = described_class.instances
-      expect(instances).to have(1).items
+      expect(instances.size).to eq(1)
       expect(instances[0].name).to eq 'updates'
     end
 
