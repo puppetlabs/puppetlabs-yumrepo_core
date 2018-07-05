@@ -327,45 +327,6 @@ describe Puppet::Type.type(:yumrepo) do
 
     describe 'proxy_password' do
       it_behaves_like 'a yumrepo parameter that can be absent', :proxy_password
-
-      context 'for password information in the logs' do
-        let(:transaction) { Puppet::Transaction.new(Puppet::Resource::Catalog.new, nil, nil) }
-        let(:harness) { Puppet::Transaction::ResourceHarness.new(transaction) }
-        let(:provider_class) do
-          described_class.provide(:simple) do
-            mk_resource_methods
-            def create; end
-
-            def delete; end
-
-            def exists?
-              get(:ensure) != :absent
-            end
-
-            def flush; end
-
-            def self.instances
-              []
-            end
-          end
-        end
-        let(:provider) { provider_class.new(name: 'foo', ensure: :present) }
-        let(:resource) { described_class.new(name: 'puppetlabs', proxy_password: 'top secret', provider: provider) }
-
-        it 'redacts on creation' do
-          status = harness.evaluate(resource)
-          sync_event = status.events[0]
-          expect(sync_event.message).to eq 'changed [redacted] to [redacted]'
-        end
-
-        it 'redacts on update' do
-          harness.evaluate(resource)
-          resource[:proxy_password] = 'super classified'
-          status = harness.evaluate(resource)
-          sync_event = status.events[0]
-          expect(sync_event.message).to eq 'changed [redacted] to [redacted]'
-        end
-      end
     end
 
     describe 's3_enabled' do
@@ -467,16 +428,6 @@ describe Puppet::Type.type(:yumrepo) do
 
     describe 'password' do
       it_behaves_like 'a yumrepo parameter that can be absent', :password
-
-      it 'redacts password information from the logs' do
-        resource = described_class.new(name: 'puppetlabs', password: 'top secret')
-        harness = Puppet::Transaction::ResourceHarness.new(Puppet::Transaction.new(Puppet::Resource::Catalog.new, nil, nil))
-        harness.evaluate(resource)
-        resource[:password] = 'super classified'
-        status = harness.evaluate(resource)
-        sync_event = status.events[0]
-        expect(sync_event.message).to eq 'changed [redacted] to [redacted]'
-      end
     end
   end
 end

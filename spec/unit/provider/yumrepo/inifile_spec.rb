@@ -1,8 +1,10 @@
 require 'spec_helper'
 require 'puppet_spec/files'
+require 'puppet_spec/compiler'
 
 describe Puppet::Type.type(:yumrepo).provider(:inifile) do
   include PuppetSpec::Files
+  include PuppetSpec::Compiler
 
   after(:each) do
     described_class.clear
@@ -410,6 +412,45 @@ gpgcheck=0
 
       provider.create
       provider.flush
+    end
+  end
+
+  describe 'it redacts passwords' do
+    before :each do
+      yumrepo_dir  = tmpdir('yumrepo_provider_specs')
+      yumrepo_conf_file = tmpfile('yumrepo_conf_file', yumrepo_dir)
+      described_class.stubs(:reposdir).returns [yumrepo_dir]
+      described_class.stubs(:repofiles).returns [yumrepo_conf_file]
+    end
+
+    it 'redacts "password" on update' do
+      apply_with_error_check(<<MANIFEST)
+yumrepo { 'puppetlabs':
+  password => 'top secret'
+}
+MANIFEST
+      transaction = apply_with_error_check(<<MANIFEST)
+yumrepo { 'puppetlabs':
+  password => 'super classified'
+}
+MANIFEST
+      status = transaction.report.resource_statuses["Yumrepo[puppetlabs]"]
+      expect(status.events.first.message).to eq('changed [redacted] to [redacted]')
+    end
+
+    it 'redacts "proxy_password" on update' do
+      apply_with_error_check(<<MANIFEST)
+yumrepo { 'puppetlabs':
+  proxy_password => 'top secret'
+}
+MANIFEST
+      transaction = apply_with_error_check(<<MANIFEST)
+yumrepo { 'puppetlabs':
+  password => 'super classified'
+}
+MANIFEST
+      status = transaction.report.resource_statuses["Yumrepo[puppetlabs]"]
+      expect(status.events.first.message).to eq('changed [redacted] to [redacted]')
     end
   end
 end
