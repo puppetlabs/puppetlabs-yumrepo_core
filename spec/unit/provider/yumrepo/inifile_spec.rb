@@ -65,10 +65,6 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
   describe 'creating provider instances' do
     let(:virtual_inifile) { stub('virtual inifile') }
 
-    before :each do
-      described_class.stubs(:virtual_inifile).returns(virtual_inifile)
-    end
-
     let(:main_section) do
       sect = Puppet::Util::IniConfig::Section.new('main', '/some/imaginary/file')
       sect.entries << ['distroverpkg', 'centos-release']
@@ -83,6 +79,10 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
       sect.entries << ['enabled', '1']
 
       sect
+    end
+
+    before :each do
+      described_class.stubs(:virtual_inifile).returns(virtual_inifile)
     end
 
     it 'ignores the main section' do
@@ -343,10 +343,11 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
       described_class.new(type_instance)
     end
 
+    let(:yumrepo_dir) { tmpdir('yumrepo_integration_specs') }
+    let(:yumrepo_conf_file) { tmpfile('yumrepo_conf_file', yumrepo_dir) }
+
     before :each do
-      @yumrepo_dir = tmpdir('yumrepo_integration_specs')
-      @yumrepo_conf_file = tmpfile('yumrepo_conf_file', @yumrepo_dir)
-      described_class.stubs(:reposdir).returns [@yumrepo_dir]
+      described_class.stubs(:reposdir).returns [yumrepo_dir]
       type_instance.provider = provider
     end
 
@@ -354,7 +355,7 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
       provider.class.prefetch({})
       # we specifically want to create a file after prefetch has happened so that
       # none of the sections in the file exist in the prefetch cache
-      repo_file = File.join(@yumrepo_dir, 'puppetlabs-products.repo')
+      repo_file = File.join(yumrepo_dir, 'puppetlabs-products.repo')
       contents = <<-HEREDOC
 [puppetlabs-products]
 name=created_by_package_after_prefetch
@@ -398,7 +399,7 @@ gpgcheck=1
     end
 
     it 'does not error becuase of repo files that have been removed from disk' do
-      repo_file = File.join(@yumrepo_dir, 'epel.repo')
+      repo_file = File.join(yumrepo_dir, 'epel.repo')
       contents = <<-HEREDOC
 [epel]
 name=created_by_package_after_prefetch

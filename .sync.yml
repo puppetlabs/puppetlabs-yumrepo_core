@@ -1,0 +1,28 @@
+.rubocop.yml:
+  default_configs:
+    Layout/IndentHeredoc:
+      Enabled: false
+Gemfile:
+  required:
+    ':system_tests':
+      - gem: 'puppet-module-posix-system-r#{minor_version}'
+        platforms: ruby
+      - gem: 'puppet-module-win-system-r#{minor_version}'
+        platforms:
+          - mswin
+          - mingw
+          - x64_mingw
+      - gem: beaker
+        version: '~> 3.34'
+        from_env: BEAKER_VERSION
+      - gem: beaker-abs
+        from_env: BEAKER_ABS_VERSION
+        version: '~> 0.5'
+      - gem: beaker-pe
+      - gem: beaker-hostgenerator
+        from_env: BEAKER_HOSTGENERATOR_VERSION
+      - gem: beaker-rspec
+        from_env: BEAKER_RSPEC_VERSION
+      - gem: beaker-puppet
+        from_env: BEAKER_PUPPET_VERSION
+        version: '~> 0.14'
