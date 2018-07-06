@@ -59,7 +59,8 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   def self.prefetch(resources)
     repos = instances
     resources.each_key do |name|
-      if provider = repos.find { |repo| repo.name == name }
+      provider = repos.find { |repo| repo.name == name }
+      if provider
         resources[name].provider = provider
       end
     end
@@ -101,13 +102,12 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @param conf [String] Configuration file to check for value.
   # @return [String] The value of a looked up key from the configuration file.
   def self.find_conf_value(value, conf = '/etc/yum.conf')
-    if Puppet::FileSystem.exist?(conf)
-      file = Puppet::Util::IniConfig::PhysicalFile.new(conf)
-      file.read
-      if (main = file.get_section('main'))
-        main[value]
-      end
-    end
+    return unless Puppet::FileSystem.exist?(conf)
+
+    file = Puppet::Util::IniConfig::PhysicalFile.new(conf)
+    file.read
+    main = file.get_section('main')
+    main ? main[value] : nil
   end
 
   # Enumerate all files that may contain yum repository configs.
@@ -164,7 +164,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
     result = virtual_inifile[name]
     # Create a new section if not found.
     unless result
-      path = getRepoPath(name)
+      path = repo_path(name)
       result = virtual_inifile.add_section(name, path)
     end
     result
@@ -188,7 +188,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
     end
   end
 
-  def self.getRepoPath(name)
+  def self.repo_path(name)
     dirs = reposdir
     path = if dirs.empty?
              # If no repo directories are present, default to using yum.conf.
@@ -212,7 +212,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
     # Check to see if the file that would be created in the
     # default location for the yumrepo already exists on disk.
     # If it does, read it in to the virtual inifile
-    path = self.class.getRepoPath(name)
+    path = self.class.repo_path(name)
     self.class.virtual_inifile.read(path) if Puppet::FileSystem.file?(path)
 
     # We fetch a list of properties from the type, then iterate
@@ -222,9 +222,8 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
     PROPERTIES.each do |property|
       next if property == :ensure
 
-      if value = @resource.should(property)
-        send("#{property}=", value)
-      end
+      value = @resource.should(property)
+      send("#{property}=", value) if value
     end
   end
 
