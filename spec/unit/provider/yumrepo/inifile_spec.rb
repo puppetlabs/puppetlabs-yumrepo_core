@@ -417,7 +417,7 @@ gpgcheck=0
 
   describe 'it redacts passwords' do
     before :each do
-      yumrepo_dir  = tmpdir('yumrepo_provider_specs')
+      yumrepo_dir = tmpdir('yumrepo_provider_specs')
       yumrepo_conf_file = tmpfile('yumrepo_conf_file', yumrepo_dir)
       described_class.stubs(:reposdir).returns [yumrepo_dir]
       described_class.stubs(:repofiles).returns [yumrepo_conf_file]
@@ -434,7 +434,7 @@ yumrepo { 'puppetlabs':
   password => 'super classified'
 }
 MANIFEST
-      status = transaction.report.resource_statuses["Yumrepo[puppetlabs]"]
+      status = transaction.report.resource_statuses['Yumrepo[puppetlabs]']
       expect(status.events.first.message).to eq('changed [redacted] to [redacted]')
     end
 
@@ -449,7 +449,7 @@ yumrepo { 'puppetlabs':
   password => 'super classified'
 }
 MANIFEST
-      status = transaction.report.resource_statuses["Yumrepo[puppetlabs]"]
+      status = transaction.report.resource_statuses['Yumrepo[puppetlabs]']
       expect(status.events.first.message).to eq('changed [redacted] to [redacted]')
     end
   end

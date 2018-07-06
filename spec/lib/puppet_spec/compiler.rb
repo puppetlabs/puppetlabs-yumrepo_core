@@ -20,8 +20,8 @@ module PuppetSpec::Compiler
       catalog.resources.each { |res| yield res }
     end
     transaction = Puppet::Transaction.new(catalog,
-                                         Puppet::Transaction::Report.new,
-                                         prioritizer)
+                                          Puppet::Transaction::Report.new,
+                                          prioritizer)
     transaction.evaluate
     transaction.report.finalize_report
 
