@@ -17,7 +17,7 @@ The yumrepo_core module is used to manage client yum repo configurations by pars
 
 ### Beginning with yumrepo_core
 
-To manage a yum repo for Puppet Labs Products, while using a local mirror:
+To manage a yum repo for Puppet Labs Products while using a local mirror, use the following code:
 
 ```
 yumrepo { 'puppetrepo-products':
@@ -45,7 +45,7 @@ This module is documented using Puppet Strings.
 
 For a quick primer on how Strings works, please see [this blog post](https://puppet.com/blog/using-puppet-strings-generate-great-documentation-puppet-modules) or the [README.md](https://github.com/puppetlabs/puppet-strings/blob/master/README.md) for Puppet Strings.
 
-To generate documentation locally, run
+To generate documentation locally, run the following command:
 ```
 bundle install
 bundle exec puppet strings generate ./lib/**/*.rb
