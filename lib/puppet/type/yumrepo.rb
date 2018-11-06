@@ -319,8 +319,6 @@ Puppet::Type.newtype(:yumrepo) do
     desc "Password for this proxy. #{ABSENT_DOC}"
 
     newvalues(%r{.*}, :absent)
-
-    sensitive true
   end
 
   newproperty(:s3_enabled) do
@@ -423,6 +421,13 @@ Puppet::Type.newtype(:yumrepo) do
     desc "Password to use with the username for basic authentication.
       #{ABSENT_DOC}"
     newvalues(%r{.*}, :absent)
-    sensitive true
+  end
+
+  private
+
+  def set_sensitive_parameters(sensitive_parameters) # rubocop:disable Style/AccessorMethodName
+    parameter(:password).sensitive = true if parameter(:password)
+    parameter(:proxy_password).sensitive = true if parameter(:proxy_password)
+    super(sensitive_parameters)
   end
 end
