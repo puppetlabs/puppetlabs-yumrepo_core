@@ -4,18 +4,15 @@
 #### Table of Contents
 
 1. [Description](#description)
-2. [Setup - The basics of getting started with yumrepo_core](#setup)
-    * [Beginning with yumrepo_core](#beginning-with-yumrepo_core)
-3. [Usage - Configuration options and additional functionality](#usage)
+2. [Usage - Configuration options and additional functionality](#usage)
+3. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 4. [Development - Guide for contributing to the module](#development)
 
 ## Description
 
 The yumrepo_core module is used to manage client yum repo configurations by parsing INI configuration files.
 
-## Setup
-
-### Beginning with yumrepo_core
+## Usage
 
 To manage a yum repo for Puppet Labs Products while using a local mirror, use the following code:
 
@@ -33,13 +30,9 @@ yumrepo { 'puppetrepo-products':
 
 ```
 
-## Usage
-
-For details on usage, please see [the yumrepo puppet docs](https://puppet.com/docs/puppet/latest/types/yumrepo.html).
-
 ## Reference
 
-Please see REFERENCE.md for the reference documentation.
+Please see [`REFERENCE.md`](REFERENCE.md) for the reference documentation.
 
 This module is documented using Puppet Strings.
 

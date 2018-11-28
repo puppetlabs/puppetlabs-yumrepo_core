@@ -5,7 +5,7 @@
   "summary": "Manage client yum repo configurations by parsing yum INI configuration files.",
   "license": "Apache-2.0",
   "source": "https://github.com/puppetlabs/puppetlabs-yumrepo_core",
-  "project_page": "https://github.com/puppetlabs/puppetlabs-yumrepo_core/blob/master/README.md",
+  "project_page": "https://github.com/puppetlabs/puppetlabs-yumrepo_core",
   "issues_url": "https://tickets.puppetlabs.com/projects/MODULES",
   "dependencies": [
 
