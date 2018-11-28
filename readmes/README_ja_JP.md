@@ -5,7 +5,7 @@
 
 1. [説明](#description)
 2. [セットアップ - yumrepo_coreモジュール導入の基本](#setup)
-    * [yumrepo_coreモジュールの利用方法](#beginning-with-yumrepo_core)
+    * [yumrepo_coreモジュールの利用方法](#beginning-with-yumrepo)
 3. [使用 - 設定オプションと追加機能](#usage)
 4. [開発 - モジュール貢献についてのガイド](#development)
 
@@ -17,7 +17,7 @@ yumrepo_coreモジュールは、INI設定ファイルの構文解析による�
 <a id="setup"></a>
 ## セットアップ
 
-<a id="beginning-with-yumrepo_core"></a>
+<a id="beginning-with-yumrepo"></a>
 ### yumrepo_coreモジュールの利用方法
 
 ローカルミラー使用時にPuppet Labs製品のyumリポジトリを管理するには、以下のコードを使用します。
