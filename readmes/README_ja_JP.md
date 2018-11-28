@@ -9,7 +9,7 @@
 3. [使用 - 設定オプションと追加機能](#usage)
 4. [開発 - モジュール貢献についてのガイド](#development)
 
-<p id="description"></a>
+<p id="description"></p>
 
 ## 説明
 
