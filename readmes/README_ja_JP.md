@@ -4,9 +4,8 @@
 #### 目次
 
 1. [説明](#description)
-2. [セットアップ - yumrepo_coreモジュール導入の基本](#setup)
-    * [yumrepo_coreモジュールの利用方法](#beginning-with-yumrepo)
-3. [使用 - 設定オプションと追加機能](#usage)
+2. [使用 - 設定オプションと追加機能](#usage)
+3. [参考 - モジュールの機能と動作について](#reference)
 4. [開発 - モジュール貢献についてのガイド](#development)
 
 <a id="description"></a>
@@ -14,11 +13,8 @@
 
 yumrepo_coreモジュールは、INI設定ファイルの構文解析によるクライアントのyumリポジトリ設定の管理に使用されます。
 
-<a id="setup"></a>
-## セットアップ
-
-<a id="beginning-with-yumrepo"></a>
-### yumrepo_coreモジュールの利用方法
+<a id="usage"></a>
+## 使用
 
 ローカルミラー使用時にPuppet Labs製品のyumリポジトリを管理するには、以下のコードを使用します。
 
@@ -36,11 +32,7 @@ yumrepo { 'puppetrepo-products':
 
 ```
 
-<a id="usage"></a>
-## 使用
-
-利用方法の詳細については、[yumrepo puppetドキュメント](https://puppet.com/docs/puppet/latest/types/yumrepo.html)を参照してください。
-
+<a id="reference"></a>
 ## リファレンス
 
 リファレンス文書については、REFERENCE.mdを参照してください。
