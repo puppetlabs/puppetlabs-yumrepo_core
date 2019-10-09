@@ -267,6 +267,16 @@ Puppet::Type.newtype(:yumrepo) do
     newvalues(%r{^-?\d+$}, :absent)
   end
 
+  newproperty(:minrate) do
+    desc "Sets the low speed threshold in bytes per second.
+    If the server is sending data slower than this for at least
+    `timeout` seconds, Yum aborts the connection. The default is
+    `1000`.
+      #{ABSENT_DOC}"
+
+    newvalues(%r{^\d+$}, :absent)
+  end
+
   newproperty(:throttle) do
     desc "Enable bandwidth throttling for downloads. This option
       can be expressed as a absolute data rate in bytes/sec or a
