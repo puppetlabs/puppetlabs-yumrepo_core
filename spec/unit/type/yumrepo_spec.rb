@@ -429,5 +429,11 @@ describe Puppet::Type.type(:yumrepo) do
     describe 'password' do
       it_behaves_like 'a yumrepo parameter that can be absent', :password
     end
+
+    describe 'minrate' do
+      it_behaves_like 'a yumrepo parameter that can be absent', :minrate
+      it_behaves_like 'a yumrepo parameter that can be an integer', :minrate
+      it_behaves_like "a yumrepo parameter that can't be a negative integer", :minrate
+    end
   end
 end
