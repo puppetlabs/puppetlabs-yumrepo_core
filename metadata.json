@@ -1,7 +1,7 @@
 {
   "name": "puppetlabs-yumrepo_core",
   "version": "1.0.3",
-  "author": "Puppet Labs",
+  "author": "puppetlabs",
   "summary": "Manage client yum repo configurations by parsing yum INI configuration files.",
   "license": "Apache-2.0",
   "source": "https://github.com/puppetlabs/puppetlabs-yumrepo_core",
@@ -58,7 +58,7 @@
       "version_requirement": ">= 4.7.0 < 7.0.0"
     }
   ],
-  "pdk-version": "1.8.0",
-  "template-url": "https://github.com/puppetlabs/pdk-templates",
-  "template-ref": "heads/master-0-gd61c0a4"
+  "pdk-version": "1.14.0",
+  "template-url": "https://github.com/puppetlabs/pdk-templates#1.14.0",
+  "template-ref": "1.14.0-0-g1bf3a4e"
 }
