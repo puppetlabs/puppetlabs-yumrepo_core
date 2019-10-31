@@ -43,3 +43,6 @@ appveyor.yml:
   global_env:
     - "---BEAKER_PUPPET_COLLECTION=puppet5 PUPPET_GEM_VERSION=\"~> 5.0\""
     - BEAKER_PUPPET_COLLECTION=puppet6 PUPPET_GEM_VERSION="git://github.com/puppetlabs/puppet#master"
+
+Rakefile:
+  changelog_version_tag_pattern: '%s'
