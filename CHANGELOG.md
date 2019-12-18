@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [1.0.5](https://github.com/puppetlabs/puppetlabs-yumrepo_core/tree/1.0.5) (2019-12-18)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-yumrepo_core/compare/1.0.4...1.0.5)
+
+### Fixed
+
+- \(MODULES-10246\) Proxy settings allow empty string [\#22](https://github.com/puppetlabs/puppetlabs-yumrepo_core/pull/22) ([Dorin-Pleava](https://github.com/Dorin-Pleava))
+
 ## [1.0.4](https://github.com/puppetlabs/puppetlabs-yumrepo_core/tree/1.0.4) (2019-10-31)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-yumrepo_core/compare/1.0.3...1.0.4)
