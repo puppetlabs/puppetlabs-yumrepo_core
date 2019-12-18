@@ -312,13 +312,37 @@ describe Puppet::Type.type(:yumrepo) do
 
     describe 'proxy' do
       it_behaves_like 'a yumrepo parameter that can be absent', :proxy
+      it_behaves_like 'a yumrepo parameter that accepts a single URL', :proxy
+
       it 'accepts _none_' do
         described_class.new(
           name: 'puppetlabs',
           proxy: '_none_',
         )
       end
-      it_behaves_like 'a yumrepo parameter that accepts a single URL', :proxy
+
+      it 'accepts an empty string' do
+        described_class.new(
+          name: 'puppetlabs',
+          proxy: '',
+        )
+      end
+
+      it "munges '_none_' to empty string for EL >= 8" do
+        Facter.stubs(:value).with(:operatingsystemmajrelease).returns('8')
+        instance = described_class.new(name: 'puppetlabs', proxy: '_none_')
+        expect(instance[:proxy]).to eq ''
+      end
+
+      it "does not munges '_none_' to empty string for EL < 8" do
+        Facter.stubs(:value).with(:operatingsystemmajrelease).returns('7')
+        instance = described_class.new(name: 'puppetlabs', proxy: '_none_')
+        expect(instance[:proxy]).to eq '_none_'
+      end
+
+      it 'does not raise any errors' do
+        expect { described_class.new(name: 'puppetlabs', proxy: '') }.not_to raise_error
+      end
     end
 
     describe 'proxy_username' do

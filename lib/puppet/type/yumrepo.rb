@@ -304,18 +304,24 @@ Puppet::Type.newtype(:yumrepo) do
 
   newproperty(:proxy) do
     desc "URL of a proxy server that Yum should use when accessing this repository.
-      This attribute can also be set to `'_none_'`, which will make Yum bypass any
-      global proxy settings when accessing this repository.
+      This attribute can also be set to '_none_' (or '' for EL >= 8 only),
+      which will make Yum bypass any global proxy settings when accessing this repository.
       #{ABSENT_DOC}"
 
     newvalues(%r{.*}, :absent)
     validate do |value|
       next if value.to_s =~ %r{^(absent|_none_)$}
-      parsed = URI.parse(value)
+      next if value.to_s.empty? && Facter.value(:operatingsystemmajrelease).to_i >= 8
 
+      parsed = URI.parse(value)
       unless VALID_SCHEMES.include?(parsed.scheme)
         raise _('Must be a valid URL')
       end
+    end
+
+    munge do |value|
+      return '' if Facter.value(:operatingsystemmajrelease).to_i >= 8 && value.to_s == '_none_'
+      value.to_s
     end
   end
 
