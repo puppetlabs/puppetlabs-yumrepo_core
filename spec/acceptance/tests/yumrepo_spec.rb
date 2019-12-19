@@ -90,5 +90,65 @@ UPDATED
         assert_match(res['descr'], 'Puppet Labs Products El 7 - $basearch')
       end
     end
+
+    describe '`proxy` property' do
+      context 'when set to a URL' do
+        it 'applies idempotently' do
+          pp = <<-MANIFEST
+          yumrepo {'proxied-repo':
+            baseurl => 'http://myownmirror',
+            proxy   => 'http://proxy.example.com:3128',
+          }
+          MANIFEST
+
+          apply_manifest(pp, catch_failures: true)
+          apply_manifest(pp, catch_changes: true)
+        end
+
+        describe file('/etc/yum.repos.d/proxied-repo.repo') do
+          its(:content) { is_expected.to contain('proxy=http://proxy.example.com:3128') }
+        end
+      end
+      context 'when set to `absent`' do
+        it 'applies idempotently' do
+          pp = <<-MANIFEST
+          yumrepo {'proxied-repo':
+            baseurl => 'http://myownmirror',
+            proxy   => absent,
+          }
+          MANIFEST
+
+          apply_manifest(pp, catch_failures: true)
+          apply_manifest(pp, catch_changes: true)
+        end
+
+        describe file('/etc/yum.repos.d/proxied-repo.repo') do
+          its(:content) { is_expected.not_to contain('proxy') }
+        end
+      end
+      context 'when set to `_none_`' do
+        it 'applies idempotently' do
+          pp = <<-MANIFEST
+          yumrepo {'proxied-repo':
+            baseurl => 'http://myownmirror',
+            proxy   => '_none_',
+          }
+          MANIFEST
+
+          apply_manifest(pp, catch_failures: true)
+          apply_manifest(pp, catch_changes: true)
+        end
+
+        if fact('os.release.major') == '8'
+          describe file('/etc/yum.repos.d/proxied-repo.repo') do
+            its(:content) { is_expected.to match(%r{^proxy=$}) }
+          end
+        else
+          describe file('/etc/yum.repos.d/proxied-repo.repo') do
+            its(:content) { is_expected.to match(%r{^proxy=_none_$}) }
+          end
+        end
+      end
+    end
   end
 end
