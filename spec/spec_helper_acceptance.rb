@@ -4,12 +4,11 @@ require 'beaker/puppet_install_helper'
 
 $LOAD_PATH << File.join(__dir__, 'acceptance/lib')
 
+run_puppet_install_helper unless ENV['BEAKER_provision'] == 'no'
+
 RSpec.configure do |c|
   c.before :suite do
-    unless ENV['BEAKER_provision'] == 'no'
-      run_puppet_install_helper
-      install_module_on(hosts)
-      install_module_dependencies_on(hosts)
-    end
+    install_module
+    install_module_dependencies
   end
 end
