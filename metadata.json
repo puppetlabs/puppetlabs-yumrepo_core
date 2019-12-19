@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-yumrepo_core",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "puppetlabs",
   "summary": "Manage client yum repo configurations by parsing yum INI configuration files.",
   "license": "Apache-2.0",
