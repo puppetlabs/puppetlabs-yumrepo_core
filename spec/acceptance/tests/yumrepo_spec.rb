@@ -139,7 +139,7 @@ UPDATED
           apply_manifest(pp, catch_changes: true)
         end
 
-        if fact('os.release.major') == '8'
+        if fact('os.release.major').to_i >= 8
           describe file('/etc/yum.repos.d/proxied-repo.repo') do
             its(:content) { is_expected.to match(%r{^proxy=$}) }
           end
