@@ -204,6 +204,15 @@ Puppet::Type.newtype(:yumrepo) do
     munge(&munge_yum_bool)
   end
 
+  newproperty(:module_hotfixes) do
+    desc "Whether packages from this repo can be installed into modules.
+      #{YUM_BOOLEAN_DOC}
+      #{ABSENT_DOC}"
+
+    newvalues(YUM_BOOLEAN, :absent)
+    munge(&munge_yum_bool)
+  end
+
   newproperty(:failovermethod) do
     desc "The failover method for this repository; should be either
       `roundrobin` or `priority`. #{ABSENT_DOC}"

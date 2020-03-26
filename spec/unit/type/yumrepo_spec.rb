@@ -222,6 +222,11 @@ describe Puppet::Type.type(:yumrepo) do
       it_behaves_like 'a yumrepo parameter that can be absent', :enablegroups
     end
 
+    describe 'module_hotfixes' do
+      it_behaves_like 'a yumrepo parameter that expects a boolean parameter', :module_hotfixes
+      it_behaves_like 'a yumrepo parameter that can be absent', :module_hotfixes
+    end
+
     describe 'failovermethod' do
       ['roundrobin', 'priority'].each do |value|
         it "accepts a value of #{value}" do
