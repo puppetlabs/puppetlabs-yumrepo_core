@@ -134,8 +134,7 @@ repository.
 
 Valid values: YUM_BOOLEAN, absent
 
-To make the system use packages from a repository regardless of 
-their modularity, specify module_hotfixes=true in the .repo file.
+Whether packages from this repo can be installed into modules.
 
 ##### `failovermethod`
 
@@ -192,6 +191,15 @@ Priority of this repository. Can be any integer value
 (including negative). Requires that the `priorities` plugin
 is installed and enabled.
 
+##### `minrate`
+
+Valid values: %r{^\d+$}, absent
+
+Sets the low speed threshold in bytes per second.
+If the server is sending data slower than this for at least
+`timeout` seconds, Yum aborts the connection. The default is
+`1000`.
+
 ##### `throttle`
 
 Valid values: %r{^\d+[kMG%]?$}, absent
@@ -222,8 +230,8 @@ Cost of this repository.
 Valid values: %r{.*}, absent
 
 URL of a proxy server that Yum should use when accessing this repository.
-This attribute can also be set to `'_none_'`, which will make Yum bypass any
-global proxy settings when accessing this repository.
+This attribute can also be set to '_none_' (or '' for EL >= 8 only),
+which will make Yum bypass any global proxy settings when accessing this repository.
 
 ##### `proxy_username`
 
