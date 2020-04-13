@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [1.0.7](https://github.com/puppetlabs/puppetlabs-yumrepo_core/tree/1.0.7) (2020-04-13)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-yumrepo_core/compare/1.0.6...1.0.7)
+
+### Added
+
+- \(MODULES-10617\) Add property module\_hotfixes [\#28](https://github.com/puppetlabs/puppetlabs-yumrepo_core/pull/28) ([seriv](https://github.com/seriv))
+
 ## [1.0.6](https://github.com/puppetlabs/puppetlabs-yumrepo_core/tree/1.0.6) (2019-12-19)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-yumrepo_core/compare/1.0.5...1.0.6)
