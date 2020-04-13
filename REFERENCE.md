@@ -130,6 +130,13 @@ Valid values: YUM_BOOLEAN, absent
 Whether yum will allow the use of package groups for this
 repository.
 
+##### `module_hotfixes`
+
+Valid values: YUM_BOOLEAN, absent
+
+To make the system use packages from a repository regardless of 
+their modularity, specify module_hotfixes=true in the .repo file.
+
 ##### `failovermethod`
 
 Valid values: %r{^roundrobin|priority$}, absent
