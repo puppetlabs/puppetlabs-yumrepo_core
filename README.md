@@ -1,7 +1,7 @@
 
 # yumrepo_core
 
-[![Modules Status](https://github.com/puppetlabs/puppetlabs-yumrepo_core/workflows/[Daily]%20Unit%20Tests%20with%nightly%20Puppet%20gem/badge.svg?branch=main)](https://github.com/puppetlabs/puppetlabs-yumrepo_core/actions)
+[![Modules Status](https://github.com/puppetlabs/puppetlabs-yumrepo_core/workflows/%5BDaily%5D%20Unit%20Tests%20with%20nightly%20Puppet%20gem/badge.svg?branch=main)](https://github.com/puppetlabs/puppetlabs-yumrepo_core/actions)
 [![Modules Status](https://github.com/puppetlabs/puppetlabs-yumrepo_core/workflows/Static%20Code%20Analysis/badge.svg?branch=main)](https://github.com/puppetlabs/puppetlabs-yumrepo_core/actions) 
 [![Modules Status](https://github.com/puppetlabs/puppetlabs-yumrepo_core/workflows/Unit%20Tests%20with%20nightly%20Puppet%20gem/badge.svg?branch=main)](https://github.com/puppetlabs/puppetlabs-yumrepo_core/actions) 
 [![Modules Status](https://github.com/puppetlabs/puppetlabs-yumrepo_core/workflows/Unit%20Tests%20with%20released%20Puppet%20gem/badge.svg?branch=main)](https://github.com/puppetlabs/puppetlabs-yumrepo_core/actions)
