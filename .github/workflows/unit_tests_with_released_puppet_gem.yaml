@@ -3,9 +3,9 @@ name: Unit Tests with released Puppet gem
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ main ]
   pull_request:
-    branches: [ $default-branch ]
+    branches: [ main ]
 
 jobs:
   unit_tests_with_released_puppet_gem:
