@@ -17,6 +17,14 @@ ruby_version_segments = Gem::Version.new(RUBY_VERSION.dup).segments
 minor_version = ruby_version_segments[0..1].join('.')
 
 group :development do
+  gem "parallel_tests", '>= 2.14.1', '< 2.14.3',                 require: false
+  gem "metadata-json-lint", '>= 2.0.2', '< 3.0.0',               require: false
+  gem "rspec-puppet-facts", '~> 1.10.0',                         require: false
+  gem "rspec_junit_formatter", '~> 0.2',                         require: false
+  gem "rubocop", '~> 0.49.0',                                    require: false
+  gem "rubocop-rspec", '~> 1.16.0',                              require: false
+  gem "rubocop-i18n", '~> 1.2.0',                                require: false
+  gem "puppetlabs_spec_helper", '>= 2.9.0', '< 3.0.0',           require: false
   gem "fast_gettext", '1.1.0',                                   require: false if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.1.0')
   gem "fast_gettext",                                            require: false if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.1.0')
   gem "json_pure", '<= 2.0.1',                                   require: false if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.0.0')
@@ -25,9 +33,7 @@ group :development do
   gem "json", '= 2.1.0',                                         require: false if Gem::Requirement.create(['>= 2.5.0', '< 2.7.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
   gem "rb-readline", '= 0.5.5',                                  require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "puppet-module-posix-default-r#{minor_version}", '~> 0.3', require: false, platforms: [:ruby]
-  gem "puppet-module-posix-dev-r#{minor_version}", '~> 0.3',     require: false, platforms: [:ruby]
   gem "puppet-module-win-default-r#{minor_version}", '~> 0.3',   require: false, platforms: [:mswin, :mingw, :x64_mingw]
-  gem "puppet-module-win-dev-r#{minor_version}", '~> 0.3',       require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "github_changelog_generator",                              require: false, git: 'https://github.com/skywinder/github-changelog-generator', ref: '20ee04ba1234e9e83eb2ffb5056e23d641c7a018' if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')
 end
 group :system_tests do
