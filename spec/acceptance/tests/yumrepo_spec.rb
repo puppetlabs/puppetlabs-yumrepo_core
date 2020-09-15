@@ -58,7 +58,13 @@ ABSENT
       resource(agent, 'file', deps_repo) do |res|
         # absent removes the entry, leaving an empty file with a known checksum
         assert_equal(res['ensure'], 'file')
-        assert_equal(res['content'], '{md5}d41d8cd98f00b204e9800998ecf8427e')
+
+        # Puppet 7 uses SHA256 as the default digest algorithm
+        if on(agent, puppet('--version')).stdout =~ %r{^7\.}
+          assert_equal(res['content'], '{sha256}e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+        else
+          assert_equal(res['content'], '{md5}d41d8cd98f00b204e9800998ecf8427e')
+        end
       end
     end
 
