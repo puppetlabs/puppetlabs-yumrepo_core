@@ -9,7 +9,7 @@ on:
 
 jobs:
   unit_tests_with_released_puppet_gem:
-    name: ${{ matrix.os_type }} / Puppet${{ matrix.puppet_version }} gem / Ruby ${{ matrix.ruby }} 
+    name: ${{ matrix.os_type }} / Puppet${{ matrix.puppet_version }} gem / Ruby ${{ matrix.ruby }}
     strategy:
       matrix:
         os: [ 'ubuntu-18.04', 'macos-10.15', 'windows-2016' ]
@@ -41,6 +41,7 @@ jobs:
 
       - name: Prepare testing environment with bundler
         run: |
+          git config --global core.longpaths true
           bundle config set system 'true'
           bundle update --jobs 4 --retry 3
 
