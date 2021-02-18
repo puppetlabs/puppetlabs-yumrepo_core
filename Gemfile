@@ -47,8 +47,11 @@ group :system_tests do
   gem "beaker-hostgenerator"
   gem "beaker-rspec"
   gem "beaker-puppet", *location_for(ENV['BEAKER_PUPPET_VERSION'] || '~> 1.0')
-  gem "pdk", '~> 1.18',                                                          platforms: [:ruby]
+end
+
+group :release do
   gem "puppet-blacksmith", '~> 3.4',                                             require: false
+  gem "pdk",                                                                     platforms: [:ruby]
 end
 
 puppet_version = ENV['PUPPET_GEM_VERSION']

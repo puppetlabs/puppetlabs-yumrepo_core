@@ -43,6 +43,7 @@ jobs:
         run: |
           git config --global core.longpaths true
           bundle config set system 'true'
+          bundle config set --local without 'release'
           bundle update --jobs 4 --retry 3
 
       - name: Run unit tests
