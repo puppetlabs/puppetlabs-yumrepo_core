@@ -12,7 +12,7 @@ jobs:
     name: Run checks
 
     env:
-      ruby_version: 2.5
+      ruby_version: 2.6
       extra_checks: check:symlinks check:git_ignore check:dot_underscore check:test_file
 
     runs-on: 'ubuntu-18.04'
