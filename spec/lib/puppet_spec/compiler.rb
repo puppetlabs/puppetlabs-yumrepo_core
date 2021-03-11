@@ -19,7 +19,7 @@ module PuppetSpec::Compiler
     if Puppet.version.to_f < 5.0
       args << 'apply'
       # rubocop:disable RSpec/AnyInstance
-      Puppet::Transaction::Persistence.any_instance.stubs(:save)
+      allow_any_instance_of(Puppet::Transaction::Persistence).to receive(:save)
       # rubocop:enable RSpec/AnyInstance
     end
     catalog = compile_to_ral(manifest)
@@ -37,7 +37,7 @@ module PuppetSpec::Compiler
 
   def apply_with_error_check(manifest)
     apply_compiled_manifest(manifest) do |res|
-      res.expects(:err).never
+      expect(res).not_to receive(:err)
     end
   end
 end

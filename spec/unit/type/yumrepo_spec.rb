@@ -326,27 +326,20 @@ describe Puppet::Type.type(:yumrepo) do
         )
       end
 
-      it 'accepts an empty string' do
-        described_class.new(
-          name: 'puppetlabs',
-          proxy: '',
-        )
-      end
-
       it "munges '_none_' to empty string for EL >= 8" do
-        Facter.stubs(:value).with(:operatingsystemmajrelease).returns('8')
+        allow(Facter).to receive(:value).with(:operatingsystemmajrelease).and_return('8')
         instance = described_class.new(name: 'puppetlabs', proxy: '_none_')
         expect(instance[:proxy]).to eq ''
       end
 
-      it "does not munges '_none_' to empty string for EL < 8" do
-        Facter.stubs(:value).with(:operatingsystemmajrelease).returns('7')
+      it "does not munge '_none_' to empty string for EL < 8" do
+        allow(Facter).to receive(:value).with(:operatingsystemmajrelease).and_return('7')
         instance = described_class.new(name: 'puppetlabs', proxy: '_none_')
         expect(instance[:proxy]).to eq '_none_'
       end
 
       it 'does not raise any errors' do
-        expect { described_class.new(name: 'puppetlabs', proxy: '') }.not_to raise_error
+        expect { described_class.new(name: 'puppetlabs', proxy: '_none_') }.not_to raise_error
       end
     end
 
