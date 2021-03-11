@@ -51,7 +51,7 @@ end
 
 group :release do
   gem "puppet-blacksmith", '~> 3.4',                                             require: false
-  gem "pdk",                                                                     platforms: [:ruby]
+  gem "pdk", '~> 2.0',                                                           platforms: [:ruby]
 end
 
 puppet_version = ENV['PUPPET_GEM_VERSION']
