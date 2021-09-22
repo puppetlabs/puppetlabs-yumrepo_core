@@ -25,6 +25,12 @@
     },
     {
       "operatingsystem": "Fedora"
+    },
+    {
+      "operatingsystem": "Rocky"
+    },
+    {
+      "operatingsystem": "AlmaLinux"
     }
   ],
   "requirements": [
