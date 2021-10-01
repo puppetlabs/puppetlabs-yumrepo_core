@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require 'bundler'
 require 'puppet_litmus/rake_tasks' if Bundler.rubygems.find_name('puppet_litmus').any?
 require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-syntax/tasks/puppet-syntax'
@@ -32,7 +35,7 @@ end
 
 def changelog_future_release
   return unless Rake.application.top_level_tasks.include? "changelog"
-  returnVal = "%s" % JSON.load(File.read('metadata.json'))['version']
+  returnVal = "v%s" % JSON.load(File.read('metadata.json'))['version']
   raise "unable to find the future_release (version) in metadata.json" if returnVal.nil?
   puts "GitHubChangelogGenerator future_release:#{returnVal}"
   returnVal
@@ -50,7 +53,7 @@ if Bundler.rubygems.find_name('github_changelog_generator').any?
     config.header = "# Change log\n\nAll notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org)."
     config.add_pr_wo_labels = true
     config.issues = false
-    config.merge_prefix = "### UNCATEGORIZED PRS; GO LABEL THEM"
+    config.merge_prefix = "### UNCATEGORIZED PRS; LABEL THEM ON GITHUB"
     config.configure_sections = {
       "Changed" => {
         "prefix" => "### Changed",
@@ -58,11 +61,11 @@ if Bundler.rubygems.find_name('github_changelog_generator').any?
       },
       "Added" => {
         "prefix" => "### Added",
-        "labels" => ["feature", "enhancement"],
+        "labels" => ["enhancement", "feature"],
       },
       "Fixed" => {
         "prefix" => "### Fixed",
-        "labels" => ["bugfix"],
+        "labels" => ["bug", "documentation", "bugfix"],
       },
     }
   end
@@ -70,42 +73,16 @@ else
   desc 'Generate a Changelog from GitHub'
   task :changelog do
     raise <<EOM
-The changelog tasks depends on unreleased features of the github_changelog_generator gem.
+The changelog tasks depends on recent features of the github_changelog_generator gem.
 Please manually add it to your .sync.yml for now, and run `pdk update`:
 ---
 Gemfile:
   optional:
     ':development':
       - gem: 'github_changelog_generator'
-        git: 'https://github.com/skywinder/github-changelog-generator'
-        ref: '20ee04ba1234e9e83eb2ffb5056e23d641c7a018'
-        condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')"
+        version: '~> 1.15'
+        condition: "Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.3.0')"
 EOM
   end
 end
 
-desc "verify that commit messages match CONTRIBUTING.md requirements"
-task(:commits) do
-  # This rake task looks at the summary from every commit from this branch not
-  # in the branch targeted for a PR.
-  commit_range = 'HEAD^..HEAD'
-  puts "Checking commits #{commit_range}"
-  %x{git log --no-merges --pretty=%s #{commit_range}}.each_line do |commit_summary|
-    # This regex tests for the currently supported commit summary tokens.
-    # The exception tries to explain it in more full.
-    if /^\((maint|packaging|doc|docs|modules-\d+)\)|revert/i.match(commit_summary).nil?
-      raise "\n\n\n\tThis commit summary didn't match CONTRIBUTING.md guidelines:\n" \
-        "\n\t\t#{commit_summary}\n" \
-        "\tThe commit summary (i.e. the first line of the commit message) should start with one of:\n"  \
-        "\t\t(MODULES-<digits>) # this is most common and should be a ticket at tickets.puppet.com\n" \
-        "\t\t(docs)\n" \
-        "\t\t(docs)(DOCUMENT-<digits>)\n" \
-        "\t\t(packaging)\n"
-        "\t\t(maint)\n" \
-        "\n\tThis test for the commit summary is case-insensitive.\n\n\n"
-    else
-      puts "#{commit_summary}"
-    end
-    puts "...passed"
-  end
-end
