@@ -10,10 +10,10 @@ module PuppetSpec::Files
   def self.cleanup
     until @global_tempfiles.empty?
       path = @global_tempfiles.pop
-      begin
-        allow(Dir).to receive(:entries).and_call_original
-        FileUtils.rm_rf path, secure: true
-      end
+
+      allow(Dir).to receive(:entries).and_call_original
+      FileUtils.rm_rf path, secure: true
+
     end
   end
 
