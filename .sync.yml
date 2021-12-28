@@ -20,6 +20,9 @@ Gemfile:
         from_env: BEAKER_PUPPET_VERSION
         version: '~> 1.22'
       - gem: github_changelog_generator
+      # We can unpin async when we move to Ruby 3
+      - gem: async
+        version: '~> 1'      
       - gem: beaker-module_install_helper
       - gem: beaker-puppet_install_helper
       - gem: nokogiri

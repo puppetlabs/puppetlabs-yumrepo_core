@@ -31,6 +31,7 @@ group :development do
   gem "beaker-rspec"
   gem "beaker-puppet", *location_for(ENV['BEAKER_PUPPET_VERSION'] || '~> 1.22')
   gem "github_changelog_generator",                                              require: false
+  gem "async", '~> 1',                                                           require: false
   gem "beaker-module_install_helper",                                            require: false
   gem "beaker-puppet_install_helper",                                            require: false
   gem "nokogiri",                                                                require: false
