@@ -1,11 +1,8 @@
 require 'spec_helper_acceptance'
 
-# The target parameter doesn't work (see PUP-2782) so this creates two
-# files instead of two repo entries in the one target file
-products_repo = '/etc/yum.repos.d/puppetrepo-products.repo'
-deps_repo = '/etc/yum.repos.d/puppetrepo-deps.repo'
+puppet_repo = '/etc/yum.repos.d/puppetlabs.repo'
 manifest = <<MANIFEST
-yumrepo {'puppetrepo-products':
+yumrepo { 'puppetrepo-products':
   name      => 'puppetrepo-products',
   descr     => 'Puppet Labs Products El 7 - $basearch',
   ensure    => 'present',
@@ -13,9 +10,9 @@ yumrepo {'puppetrepo-products':
   gpgkey    => 'http://myownmirror',
   enabled   => '1',
   gpgcheck  => '1',
-  target    => '/etc/yum.repo.d/puppetlabs.repo',
+  target    => '/etc/yum.repos.d/puppetlabs.repo',
 }
-yumrepo{'puppetrepo-deps':
+yumrepo { 'puppetrepo-deps':
   name      => 'puppetrepo-deps',
   descr     => 'Puppet Labs Dependencies El 7 - $basearch',
   ensure    => 'present',
@@ -23,7 +20,7 @@ yumrepo{'puppetrepo-deps':
   gpgkey    => 'http://myownmirror',
   enabled   => '1',
   gpgcheck  => '1',
-  target    => '/etc/yum.repo.d/puppetlabs.repo',
+  target    => '/etc/yum.repos.d/puppetlabs.repo',
 }
 MANIFEST
 
@@ -36,34 +33,31 @@ end
 
 RSpec.context 'Manages yumrepo' do
   agents.each do |agent|
-    it 'creates multiple yum repo files' do
+    it 'creates a yum repo file' do
       apply_manifest_on(agent, manifest)
 
-      [products_repo, deps_repo].each do |repo|
-        resource(agent, 'file', repo) do |res|
-          assert_equal(res['ensure'], 'file')
-          assert_equal(res['mode'], '0644')
-        end
+      resource(agent, 'file', puppet_repo) do |res|
+        assert_equal(res['ensure'], 'file')
+        assert_equal(res['mode'], '0644')
       end
     end
 
     it 'removes a yumrepo entry' do
       apply_manifest_on(agent, <<ABSENT)
-yumrepo{'puppetrepo-deps':
+yumrepo { 'puppetrepo-deps':
   name      => 'puppetrepo-deps',
   ensure    => 'absent',
-  target    => '/etc/yum.repo.d/puppetlabs.repo',
+  target    => '/etc/yum.repos.d/puppetlabs.repo',
 }
 ABSENT
       resource(agent, 'file', deps_repo) do |res|
-        # absent removes the entry, leaving an empty file with a known checksum
         assert_equal(res['ensure'], 'file')
 
         # Puppet 7 and up uses SHA256 as the default digest algorithm
         if %r{^6\.}.match?(on(agent, puppet('--version')).stdout)
-          assert_equal(res['content'], '{md5}d41d8cd98f00b204e9800998ecf8427e')
+          assert_equal(res['content'], '{md5}8df43e112c614f3062545995b32ed3c0')
         else
-          assert_equal(res['content'], '{sha256}e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+          assert_equal(res['content'], '{sha256}a361f9e6174b1f3baca261d254c21d8d89ca274b36ebdfee5bf3223f1820aeea')
         end
       end
     end
@@ -71,7 +65,7 @@ ABSENT
     it 'updates a yumrepo entry' do
       apply_manifest_on(agent, manifest)
       apply_manifest_on(agent, <<UPDATED)
-yumrepo {'puppetrepo-products':
+yumrepo { 'puppetrepo-products':
   ensure    => 'present',
   enabled   => 'no',
   baseurl   => 'http://myothermirror',
