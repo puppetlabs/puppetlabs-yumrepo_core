@@ -1,5 +1,56 @@
 require 'puppet/util/inifile'
 
+module Puppet::Provider::Yumrepo
+  module IniConfig
+    class Section < Puppet::Util::IniConfig::Section; end
+
+    class PhysicalFile < Puppet::Util::IniConfig::PhysicalFile
+      def store
+        unlinked = false
+        if @destroy_empty and (sections.empty? or sections.all?(&:destroy?))
+          ::File.unlink(@file)
+          unlinked = true
+        elsif sections.any?(&:dirty?)
+          text = self.format
+          @filetype.write(text)
+        end
+        sections.each(&:mark_clean)
+        return unlinked
+      end
+
+      private
+
+      def section_exists?(name)
+        if self.get_section(name)
+          true
+        elsif @file_collection and section = @file_collection.get_section(name) and !section.destroy?
+          true
+        else
+          false
+        end
+      end
+    end
+
+    class FileCollection < Puppet::Util::IniConfig::FileCollection
+      def store
+        @files.delete_if do |name, file|
+          file.store
+        end
+      end
+
+      private
+
+      # Create a new physical file and set required attributes on that file.
+      def new_physical_file(file)
+        @files[file] = PhysicalFile.new(file, destroy_empty: true)
+        @files[file].file_collection = self
+        @files[file]
+      end
+    end
+    File = FileCollection
+  end
+end
+
 Puppet::Type.type(:yumrepo).provide(:inifile) do
   desc <<-EOD
     Manage yum repo configurations by parsing yum INI configuration files.
@@ -35,7 +86,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
       # Ignore the 'main' section in yum.conf since it's not a repository.
       next if section.name == 'main'
 
-      attributes_hash = { name: section.name, ensure: :present, provider: :yumrepo }
+      attributes_hash = { name: section.name, target: section.file, ensure: :present, provider: :yumrepo }
 
       section.entries.each do |key, value|
         key = key.to_sym
@@ -104,7 +155,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   def self.find_conf_value(value, conf = '/etc/yum.conf')
     return unless Puppet::FileSystem.exist?(conf)
 
-    file = Puppet::Util::IniConfig::PhysicalFile.new(conf)
+    file = Puppet::Provider::Yumrepo::IniConfig::PhysicalFile.new(conf)
     file.read
     main = file.get_section('main')
     main ? main[value] : nil
@@ -129,11 +180,11 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # Build a virtual inifile by reading in numerous .repo files into a single
   # virtual file to ease manipulation.
   # @api private
-  # @return [Puppet::Util::IniConfig::File] The virtual inifile representing
+  # @return [Puppet::Provider::Yumrepo::IniConfig::File] The virtual inifile representing
   #   multiple real files.
   def self.virtual_inifile
     unless @virtual
-      @virtual = Puppet::Util::IniConfig::File.new
+      @virtual = Puppet::Provider::Yumrepo::IniConfig::File.new
       repofiles.each do |file|
         @virtual.read(file) if Puppet::FileSystem.file?(file)
       end
@@ -159,13 +210,30 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # /etc/yum.conf is used.
   #
   # @param name [String] Section name to lookup in the virtual inifile.
-  # @return [Puppet::Util::IniConfig] The IniConfig section
-  def self.section(name)
-    result = virtual_inifile[name]
+  # @return [Puppet::Provider::Yumrepo::IniConfig::Section] The IniConfig section
+  def self.section(name, target)
+    path = repo_path(name, target)
+    result = nil
+    old_section = nil
+    virtual_inifile.each_section do |section|
+      if section.name.eql?(name)
+        if target.nil? or target.eql?(:absent) or section.file.eql?(path)
+          result = section
+        else
+          old_section = section
+          section.destroy = true
+        end
+      end
+    end
     # Create a new section if not found.
     unless result
-      path = repo_path(name)
       result = virtual_inifile.add_section(name, path)
+      # Copy section from old target if found.
+      if old_section
+        for entry in old_section.entries do
+          result.add_line(entry)
+        end
+      end
     end
     result
   end
@@ -188,15 +256,38 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
     end
   end
 
-  def self.repo_path(name)
+  def self.repo_path(name, target)
     dirs = reposdir
     path = if dirs.empty?
              # If no repo directories are present, default to using yum.conf.
+             unless target.nil? or target.eql?(:absent)
+               Puppet.debug("Using /etc/yum.conf instead of target #{target}")
+             end
              '/etc/yum.conf'
            else
              # The ordering of reposdir is [defaults, custom], and we want to use
              # the custom directory if present.
-             File.join(dirs.last, "#{name}.repo")
+             if target.nil? or target.eql?(:absent)
+               File.join(dirs.last, "#{name}.repo")
+             else
+               parent = Puppet::FileSystem.dir_string(target)
+               basename = Puppet::FileSystem.basename_string(target)
+               suffix = if target.end_with?('.repo')
+                          ''
+                        else
+                          '.repo'
+                        end
+               if parent == basename
+                 File.join(dirs.last, "#{target}#{suffix}")
+               else
+                 if dirs.include?(parent)
+                   "#{target}#{suffix}"
+                 else
+                   Puppet.debug("Parent directory of #{target} not a valid yum directory.")
+                   File.join(dirs.last, "#{basename}#{suffix}")
+                 end
+               end
+             end
            end
     path
   end
@@ -208,11 +299,12 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @return [void]
   def create
     @property_hash[:ensure] = :present
+    self.target = self.class.repo_path(name, @resource[:target]) unless @resource[:target].eql?(:absent)
 
     # Check to see if the file that would be created in the
     # default location for the yumrepo already exists on disk.
     # If it does, read it in to the virtual inifile
-    path = self.class.repo_path(name)
+    path = self.class.repo_path(name, target)
     self.class.virtual_inifile.read(path) if Puppet::FileSystem.file?(path)
 
     # We fetch a list of properties from the type, then iterate
@@ -232,7 +324,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @api public
   # @return [Boolean]
   def exists?
-    @property_hash[:ensure] == :present
+    @property_hash[:ensure] == :present and (@resource[:target].eql?(:absent) or @property_hash[:target] == self.class.repo_path(name, @resource[:target]))
   end
 
   # Mark the given repository section for destruction.
@@ -287,6 +379,18 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
     @property_hash[:descr] = value
   end
 
+  def target
+    unless @property_hash.key?(:target)
+      @property_hash[:target] = self.class.repo_path(name, nil)
+    end
+    value = @property_hash[:target]
+    value.nil? ? :absent : value
+  end
+
+  def target=(value)
+    @property_hash[:target] = value
+  end
+
   private
 
   def get_property(property)
@@ -304,10 +408,10 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   end
 
   def section(name)
-    self.class.section(name)
+    self.class.section(name, target)
   end
 
   def current_section
-    self.class.section(name)
+    self.class.section(name, target)
   end
 end
