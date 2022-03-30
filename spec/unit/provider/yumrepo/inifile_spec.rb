@@ -31,11 +31,11 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
 
   describe 'generating the virtual inifile' do
     let(:files) { ['/etc/yum.repos.d/first.repo', '/etc/yum.repos.d/second.repo', '/etc/yum.conf'] }
-    let(:collection) { instance_double('Puppet::Util::IniConfig::FileCollection') }
+    let(:collection) { instance_double('Puppet::Provider::Yumrepo::IniConfig::FileCollection') }
 
     before(:each) do
       described_class.clear
-      allow(Puppet::Util::IniConfig::FileCollection).to receive(:new).and_return collection
+      allow(Puppet::Provider::Yumrepo::IniConfig::FileCollection).to receive(:new).and_return collection
     end
 
     it 'reads all files in the directories specified by self.repofiles' do
@@ -63,10 +63,10 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
   end
 
   describe 'creating provider instances' do
-    let(:virtual_inifile) { instance_double('Puppet::Util::IniConfig::FileCollection') }
+    let(:virtual_inifile) { instance_double('Puppet::Provider::Yumrepo::IniConfig::FileCollection') }
 
     let(:main_section) do
-      sect = Puppet::Util::IniConfig::Section.new('main', '/some/imaginary/file')
+      sect = Puppet::Provider::Yumrepo::IniConfig::Section.new('main', '/some/imaginary/file')
       sect.entries << ['distroverpkg', 'centos-release']
       sect.entries << ['plugins', '1']
 
@@ -74,7 +74,7 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
     end
 
     let(:updates_section) do
-      sect = Puppet::Util::IniConfig::Section.new('updates', '/some/imaginary/file')
+      sect = Puppet::Provider::Yumrepo::IniConfig::Section.new('updates', '/some/imaginary/file')
       sect.entries << ['name', 'Some long description of the repo']
       sect.entries << ['enabled', '1']
 
@@ -104,46 +104,233 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
   end
 
   describe 'retrieving a section from the inifile' do
-    let(:collection) { instance_double('Puppet::Util::IniConfig::FileCollection') }
+    let(:collection) { instance_double('Puppet::Provider::Yumrepo::IniConfig::FileCollection') }
 
-    let(:ini_section) { instance_double('Puppet::Util::IniConfig::Section') }
+    let(:ini_section) { instance_double('Puppet::Provider::Yumrepo::IniConfig::Section', name: 'updates') }
 
     before(:each) do
       allow(described_class).to receive(:virtual_inifile).and_return(collection)
+      allow(described_class).to receive(:reposdir).and_return ['/etc/yum.repos.d']
     end
 
     describe 'and the requested section exists' do
       before(:each) do
-        allow(collection).to receive(:[]).with('updates').and_return ini_section
+        allow(collection).to receive(:each_section).and_yield(ini_section)
       end
 
-      it 'returns the existing section' do
-        expect(described_class.section('updates')).to eq ini_section
+      describe 'with no target specified' do
+        it 'returns the existing section' do
+          expect(described_class.section('updates', nil)).to eq ini_section
+        end
+
+        it "doesn't create a new section" do
+          expect(collection).to receive(:add_section).never
+          described_class.section('updates', nil)
+        end
       end
 
-      it "doesn't create a new section" do
-        expect(collection).to receive(:add_section).never
-        described_class.section('updates')
+      describe 'with a matching target' do
+        target = '/etc/yum.repos.d/expected-path.repo'
+
+        let(:ini_section) { instance_double('Puppet::Provider::Yumrepo::IniConfig::Section', name: 'updates', file: target) }
+
+        it 'returns the existing section' do
+          expect(described_class.section('updates', target)).to eq ini_section
+        end
+
+        it "doesn't create a new section" do
+          expect(collection).to receive(:add_section).never
+          described_class.section('updates', target)
+        end
+      end
+
+      describe 'with a target that differs from an existing repo file' do
+        target = '/etc/yum.repos.d/expected-path.repo'
+
+        before(:each) do
+          allow(collection).to receive(:add_section).with('updates', target).and_return(new_ini_section)
+          allow(ini_section).to receive(:destroy=).with(true)
+          allow(ini_section).to receive(:entries).and_return(['enabled',true])
+        end
+
+        let(:ini_section) { instance_double('Puppet::Provider::Yumrepo::IniConfig::Section', name: 'updates', file: '/etc/yum.repos.d/updates.repo') }
+        let(:new_ini_section) { Puppet::Provider::Yumrepo::IniConfig::Section.new('updates', target) }
+
+        it 'creates a new section' do
+          expect(collection).to receive(:add_section).with('updates', target)
+          described_class.section('updates', target)
+        end
+
+        it 'marks old section for destruction' do
+          expect(ini_section).to receive(:destroy=).with(true)
+          described_class.section('updates', target)
+        end
+
+        it 'copies the old section' do
+          expect(ini_section).to receive(:entries).and_return(['enabled',true])
+          section = described_class.section('updates', target)
+          expect(section.entries).to eq(['enabled', true])
+        end
       end
     end
 
     describe "and the requested section doesn't exist" do
-      it 'creates a section in the preferred repodir' do
+      before(:each) do
+        allow(collection).to receive(:each_section)
         allow(described_class).to receive(:reposdir).and_return ['/etc/yum.repos.d', '/etc/alternate.repos.d']
-        expect(collection).to receive(:[]).with('updates')
-        expect(collection).to receive(:add_section).with('updates', '/etc/alternate.repos.d/updates.repo')
-
-        described_class.section('updates')
       end
 
-      it 'creates a section in yum.conf if no repodirs exist' do
-        allow(described_class).to receive(:reposdir).and_return []
-        expect(collection).to receive(:[]).with('updates')
-        expect(collection).to receive(:add_section).with('updates', '/etc/yum.conf')
+      describe 'with no target specified' do
+        let(:target) { nil }
 
-        described_class.section('updates')
+        it 'creates a section in the preferred repodir' do
+          expect(collection).to receive(:add_section).with('updates', '/etc/alternate.repos.d/updates.repo')
+
+          described_class.section('updates', target)
+        end
+
+        it 'creates a section in yum.conf if no repodirs exist' do
+          allow(described_class).to receive(:reposdir).and_return []
+          expect(collection).to receive(:add_section).with('updates', '/etc/yum.conf')
+
+          described_class.section('updates', target)
+        end
+      end
+
+      describe 'with relative path target specified' do
+        let(:target) { 'custom_file.repo' }
+
+        it 'creates a section in the preferred repodir' do
+          expect(collection).to receive(:add_section).with('updates', "/etc/alternate.repos.d/#{target}")
+
+          described_class.section('updates', target)
+        end
+
+        it 'creates a section in yum.conf if no repodirs exist' do
+          allow(described_class).to receive(:reposdir).and_return []
+          expect(collection).to receive(:add_section).with('updates', '/etc/yum.conf')
+
+          described_class.section('updates', target)
+        end
+      end
+
+      describe 'with absolute path target specified' do
+        describe 'path is not in valid repodir' do
+          let(:target) { '/nonexistent_dir/custom_file.repo' }
+
+          it 'creates a section in the preferred repodir' do
+            expect(collection).to receive(:add_section).with('updates', '/etc/alternate.repos.d/custom_file.repo')
+
+            described_class.section('updates', target)
+          end
+
+          it 'creates a section in yum.conf if no repodirs exist' do
+            allow(described_class).to receive(:reposdir).and_return []
+            expect(collection).to receive(:add_section).with('updates', '/etc/yum.conf')
+
+            described_class.section('updates', target)
+          end
+        end
+        describe 'path is in valid repodir' do
+          let(:target) { '/etc/yum.repos.d/custom_file.repo' }
+
+          it 'creates a section in the preferred repodir' do
+            expect(collection).to receive(:add_section).with('updates', target)
+
+            described_class.section('updates', target)
+          end
+
+          it 'creates a section in yum.conf if no repodirs exist' do
+            allow(described_class).to receive(:reposdir).and_return []
+            expect(collection).to receive(:add_section).with('updates', '/etc/yum.conf')
+
+            described_class.section('updates', target)
+          end
+        end
       end
     end
+  end
+
+  describe 'repo_path' do
+    before(:each) do
+      allow(described_class).to receive(:reposdir).and_return ['/etc/yum.repos.d']
+    end
+
+    let(:name) { 'updates' }
+    let(:subject) { described_class.repo_path(name, target) }
+
+    describe 'target is nil' do
+      let(:target) { nil }
+
+      it 'uses repo name in default directory' do
+        expect(subject).to eq('/etc/yum.repos.d/updates.repo')
+      end
+    end
+
+    describe 'target is :absent' do
+      let(:target) { :absent }
+
+      it 'uses repo name in default directory' do
+        expect(subject).to eq('/etc/yum.repos.d/updates.repo')
+      end
+    end
+
+    describe 'target path is absolute' do
+      describe 'in an invalid repodir'do
+        describe 'with .repo suffix' do
+          let(:target) { '/nonexistent_dir/custom_file.repo' }
+
+          it 'uses target basename in default directory' do
+            expect(subject).to eq('/etc/yum.repos.d/custom_file.repo')
+          end
+        end
+
+        describe 'without .repo suffix' do
+          let(:target) { '/nonexistent_dir/custom_file' }
+
+          it 'uses target basename in default directory' do
+            expect(subject).to eq('/etc/yum.repos.d/custom_file.repo')
+          end
+        end
+      end
+
+      describe 'in a valid repodir' do
+        describe 'with .repo suffix' do
+          let(:target) { '/etc/yum.repos.d/custom_file.repo' }
+
+          it 'uses target' do
+            expect(subject).to eq('/etc/yum.repos.d/custom_file.repo')
+          end
+        end
+
+        describe 'without .repo suffix' do
+          let(:target) { '/etc/yum.repos.d/custom_file' }
+
+          it 'uses target' do
+            expect(subject).to eq('/etc/yum.repos.d/custom_file.repo')
+          end
+        end
+      end
+    end
+
+    describe 'target path is relative' do
+      describe 'with .repo suffix' do
+        let(:target) { 'custom_file.repo' }
+
+        it 'uses target in default directory' do
+          expect(subject).to eq('/etc/yum.repos.d/custom_file.repo')
+        end
+      end
+
+      describe 'without .repo suffix' do
+        let(:target) { 'custom_file' }
+
+        it 'uses target in default directory' do
+          expect(subject).to eq('/etc/yum.repos.d/custom_file.repo')
+        end
+      end
+    end
+
   end
 
   describe 'setting and getting properties' do
@@ -164,12 +351,13 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
     end
 
     let(:section) do
-      instance_double('Puppet::Util::IniConfig::Section', name: 'puppetlabs-products')
+      instance_double('Puppet::Provider::Yumrepo::IniConfig::Section', name: 'puppetlabs-products')
     end
 
     before(:each) do
       type_instance.provider = provider
-      allow(described_class).to receive(:section).with('puppetlabs-products').and_return(section)
+      allow(described_class).to receive(:reposdir).and_return ['/etc/yum.repos.d']
+      allow(described_class).to receive(:section).with('puppetlabs-products', '/etc/yum.repos.d/puppetlabs-products.repo').and_return(section)
     end
 
     describe 'methods used by ensurable' do
@@ -184,7 +372,7 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
       end
 
       it '#exists? checks if the repo has been marked as present' do
-        allow(described_class).to receive(:section).and_return(instance_double('Puppet::Util::IniConfig::Section', :[]= => nil))
+        allow(described_class).to receive(:section).and_return(instance_double('Puppet::Provider::Yumrepo::IniConfig::Section', :[]= => nil))
         provider.create
         expect(provider).to be_exist
       end
@@ -292,12 +480,12 @@ describe Puppet::Type.type(:yumrepo).provider(:inifile) do
     end
 
     describe 'and the file exists' do
-      let(:pfile) { instance_double('Puppet::Util::IniConfig::PhysicalFile') }
-      let(:sect) { instance_double('Puppet::Util::IniConfig::Section') }
+      let(:pfile) { instance_double('Puppet::Provider::Yumrepo::IniConfig::PhysicalFile') }
+      let(:sect) { instance_double('Puppet::Provider::Yumrepo::IniConfig::Section') }
 
       before(:each) do
         allow(Puppet::FileSystem).to receive(:exist?).with('/etc/yum.conf').and_return true
-        allow(Puppet::Util::IniConfig::PhysicalFile).to receive(:new).with('/etc/yum.conf').and_return pfile
+        allow(Puppet::Provider::Yumrepo::IniConfig::PhysicalFile).to receive(:new).with('/etc/yum.conf').and_return pfile
         allow(pfile).to receive(:read)
       end
 
