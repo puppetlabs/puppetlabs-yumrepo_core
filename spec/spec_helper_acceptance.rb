@@ -1,6 +1,7 @@
 require 'beaker-rspec'
 require 'beaker/module_install_helper'
 require 'beaker/puppet_install_helper'
+require 'voxpupuli/acceptance/spec_helper_acceptance'
 
 $LOAD_PATH << File.join(__dir__, 'acceptance/lib')
 
