@@ -328,23 +328,23 @@ Username to use for basic authentication to a repo or really any url.
 
 The following parameters are available in the `yumrepo` type.
 
-* [`name`](#name)
-* [`provider`](#provider)
-* [`target`](#target)
+* [`name`](#-yumrepo--name)
+* [`provider`](#-yumrepo--provider)
+* [`target`](#-yumrepo--target)
 
-##### <a name="name"></a>`name`
+##### <a name="-yumrepo--name"></a>`name`
 
 namevar
 
 The name of the repository.  This corresponds to the
 `repositoryid` parameter in `yum.conf(5)`.
 
-##### <a name="provider"></a>`provider`
+##### <a name="-yumrepo--provider"></a>`provider`
 
 The specific backend to use for this `yumrepo` resource. You will seldom need to specify this --- Puppet will usually
 discover the appropriate provider for your platform.
 
-##### <a name="target"></a>`target`
+##### <a name="-yumrepo--target"></a>`target`
 
 The target parameter will be enabled in a future release and should not be used.
 
