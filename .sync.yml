@@ -20,6 +20,9 @@ Gemfile:
         from_env: BEAKER_PUPPET_VERSION
         version: '~> 1.22'
       - gem: github_changelog_generator
+        version: '= 1.16.4'
+      - gem: concurrent-ruby
+        version: '= 1.1.10'
       # We can unpin async when we move to Ruby 3
       - gem: async
         version: '~> 1'      
