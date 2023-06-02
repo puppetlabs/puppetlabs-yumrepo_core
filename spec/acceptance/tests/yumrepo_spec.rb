@@ -50,7 +50,7 @@ yumrepo { 'puppetrepo-deps':
   target    => '/etc/yum.repos.d/puppetlabs.repo',
 }
 ABSENT
-      resource(agent, 'file', deps_repo) do |res|
+      resource(agent, 'file', puppet_repo) do |res|
         assert_equal(res['ensure'], 'file')
 
         # Puppet 7 and up uses SHA256 as the default digest algorithm
@@ -75,12 +75,12 @@ yumrepo { 'puppetrepo-products':
   timeout   => '2000',
 }
 UPDATED
-      on(agent, "grep enabled=No #{products_repo}") # booleans are special
-      on(agent, "grep baseurl=http://myothermirror #{products_repo}")
-      on(agent, "grep gpgkey=http://myothermirror #{products_repo}")
-      on(agent, "grep priority=99 #{products_repo}")
-      on(agent, "grep retries=11 #{products_repo}")
-      on(agent, "grep timeout=2000 #{products_repo}")
+      on(agent, "grep enabled=No #{puppet_repo}") # booleans are special
+      on(agent, "grep baseurl=http://myothermirror #{puppet_repo}")
+      on(agent, "grep gpgkey=http://myothermirror #{puppet_repo}")
+      on(agent, "grep priority=99 #{puppet_repo}")
+      on(agent, "grep retries=11 #{puppet_repo}")
+      on(agent, "grep timeout=2000 #{puppet_repo}")
     end
 
     it 'discovers yumrepos' do
