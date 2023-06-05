@@ -44,6 +44,8 @@ Puppet::Type.newtype(:yumrepo) do
 
   newparam(:target) do
     desc 'The filepath of the local repository file, can be either relative or absolute. If a valid filepath is not specified, the target is created as a new section in `yum.conf(5)`'
+
+    defaultto :absent
   end
 
   newproperty(:descr) do
