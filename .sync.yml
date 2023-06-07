@@ -29,6 +29,8 @@ Gemfile:
       - gem: beaker-module_install_helper
       - gem: beaker-puppet_install_helper
       - gem: nokogiri
+    ":system_tests":
+      - gem: voxpupuli-acceptance
 
 appveyor.yml:
   delete: true
