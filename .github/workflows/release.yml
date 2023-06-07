@@ -2,8 +2,14 @@ name: "Publish module"
 
 on:
   workflow_dispatch:
-  
+    inputs:
+      version:
+        description: "Module version to be released. Must be a valid semver string. (1.2.3)"
+        required: true
+
 jobs:
   release: 
     uses: "puppetlabs/cat-github-actions/.github/workflows/module_release.yml@main"
+    with:
+      version: "${{ github.event.inputs.version }}"
     secrets: "inherit"
