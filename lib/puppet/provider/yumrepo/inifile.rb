@@ -1,6 +1,6 @@
 require 'puppet/util/inifile'
 
-module Puppet::Provider::Yumrepo
+module Puppet::Provider::Yumrepo # rubocop:disable Style/ClassAndModuleChildren
   module IniConfig
     class Section < Puppet::Util::IniConfig::Section; end
 
