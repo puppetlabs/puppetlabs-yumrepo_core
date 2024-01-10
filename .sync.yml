@@ -19,10 +19,6 @@ Gemfile:
       - gem: beaker-puppet
         from_env: BEAKER_PUPPET_VERSION
         version: '~> 1.22'
-      - gem: github_changelog_generator
-        version: '= 1.16.4'
-      - gem: concurrent-ruby
-        version: '= 1.1.10'
       # We can unpin async when we move to Ruby 3
       - gem: async
         version: '~> 1'      
@@ -36,9 +32,13 @@ appveyor.yml:
   delete: true
 .travis.yml:
   delete: true
-.github/workflows/auto_release.yml:
-  unmanaged: false
 .github/workflows/release.yml:
+  unmanaged: false
+.github/workflows/release_prep.yml:
   unmanaged: false
 .gitlab-ci.yml:
   delete: true
+# We still use the Vox acceptance Rake task instead of Litmus
+Rakefile:
+  requires:
+    - voxpupuli/acceptance/rake
