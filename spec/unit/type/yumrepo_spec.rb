@@ -327,13 +327,13 @@ describe Puppet::Type.type(:yumrepo) do
       end
 
       it "munges '_none_' to empty string for EL >= 8" do
-        allow(Facter).to receive(:value).with(:operatingsystemmajrelease).and_return('8')
+        allow(Facter).to receive(:value).with('os.distro.release.major').and_return('8')
         instance = described_class.new(name: 'puppetlabs', proxy: '_none_')
         expect(instance[:proxy]).to eq ''
       end
 
       it "does not munge '_none_' to empty string for EL < 8" do
-        allow(Facter).to receive(:value).with(:operatingsystemmajrelease).and_return('7')
+        allow(Facter).to receive(:value).with('os.distro.release.major').and_return('7')
         instance = described_class.new(name: 'puppetlabs', proxy: '_none_')
         expect(instance[:proxy]).to eq '_none_'
       end
