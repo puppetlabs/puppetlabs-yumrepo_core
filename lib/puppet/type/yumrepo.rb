@@ -324,7 +324,7 @@ Puppet::Type.newtype(:yumrepo) do
     newvalues(%r{.*}, :absent)
     validate do |value|
       next if %r{^(absent|_none_)$}.match?(value.to_s)
-      next if value.to_s.empty? && Facter.value('os.distro.release.major').to_i >= 8
+      next if value.to_s.empty? && Facter.value('os.release.major').to_i >= 8
 
       parsed = URI.parse(value)
       unless VALID_SCHEMES.include?(parsed.scheme)
