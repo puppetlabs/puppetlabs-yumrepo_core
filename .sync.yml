@@ -6,19 +6,18 @@ Gemfile:
   optional:
     ":development":
       - gem: beaker
-        version: '~> 4.30'
+        version: '~> 5.0'
         from_env: BEAKER_VERSION
       - gem: beaker-abs
         from_env: BEAKER_ABS_VERSION
-        version: '~> 0.9'
-      - gem: beaker-pe
+        version: '~> 1.0'
       - gem: beaker-hostgenerator
         from_env: BEAKER_HOSTGENERATOR_VERSION
       - gem: beaker-rspec
         from_env: BEAKER_RSPEC_VERSION
       - gem: beaker-puppet
         from_env: BEAKER_PUPPET_VERSION
-        version: '~> 1.22'
+        version: '~> 3.0'
       # We can unpin async when we move to Ruby 3
       - gem: async
         version: '~> 1'      
