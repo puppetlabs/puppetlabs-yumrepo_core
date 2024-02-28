@@ -42,4 +42,5 @@ appveyor.yml:
 # We still use the Vox acceptance Rake task instead of Litmus
 Rakefile:
   requires:
-    - voxpupuli/acceptance/rake
+    - require: voxpupuli/acceptance/rake
+      conditional: Gem.loaded_specs.key? 'voxpupuli-acceptance'
