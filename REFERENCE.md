@@ -346,7 +346,8 @@ discover the appropriate provider for your platform.
 
 ##### <a name="-yumrepo--target"></a>`target`
 
-The target parameter will be enabled in a future release and should not be used.
+The filepath of the local repository file, can be either relative or absolute. If a valid filepath is not specified, the
+target is created as a new section in `yum.conf(5)`
 
 Default value: `absent`
 
