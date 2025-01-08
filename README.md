@@ -33,7 +33,7 @@ yumrepo { 'puppetrepo-products':
   gpgkey    => 'http://myownmirror',
   enabled   => '1',
   gpgcheck  => '1',
-  target    => '/etc/yum.repo.d/puppetlabs.repo',
+  target    => '/etc/yum.repos.d/puppetlabs.repo',
 }
 
 ```
