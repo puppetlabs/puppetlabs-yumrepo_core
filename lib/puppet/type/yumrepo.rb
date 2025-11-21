@@ -22,7 +22,7 @@ Puppet::Type.newtype(:yumrepo) do
   # Doc string for properties that can be made 'absent'
   ABSENT_DOC = 'Set this to `absent` to remove it from the file completely.'.freeze
   # False can be false/0/no and True can be true/1/yes in yum.
-  YUM_BOOLEAN = %r{^(true|false|0|1|no|yes)$}.freeze
+  YUM_BOOLEAN = %r{^(true|false|0|1|no|yes)$}
   YUM_BOOLEAN_DOC = 'Valid values are: false/0/no or true/1/yes.'.freeze
 
   # Common munge logic for YUM_BOOLEAN values. Munges for two requirements:

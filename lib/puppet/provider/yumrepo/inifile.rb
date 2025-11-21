@@ -250,7 +250,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
       current_mode = Puppet::FileSystem.stat(file).mode & 0o777
       next if current_mode == target_mode
       resource.info _('changing mode of %{file} from %{current_mode} to %{target_mode}') %
-                    { file: file, current_mode: '%03o' % current_mode, target_mode: '%03o' % target_mode }
+                    { file:, current_mode: '%03o' % current_mode, target_mode: '%03o' % target_mode }
       Puppet::FileSystem.chmod(target_mode, file)
     end
   end
