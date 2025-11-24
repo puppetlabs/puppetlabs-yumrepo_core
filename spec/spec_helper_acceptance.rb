@@ -15,7 +15,7 @@ def run_puppet_install_helper
 
   agent_sha = ENV['BEAKER_PUPPET_AGENT_SHA'] || ENV['PUPPET_AGENT_SHA']
   if agent_sha.nil? || agent_sha.empty?
-    install_puppet_agent_on(hosts, options.merge(version: version))
+    install_puppet_agent_on(hosts, options.merge(version:))
   else
     # If we have a development sha, assume we're testing internally
     dev_builds_url = ENV['DEV_BUILDS_URL'] || 'http://builds.delivery.puppetlabs.net'
