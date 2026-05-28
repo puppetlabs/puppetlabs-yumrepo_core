@@ -82,10 +82,10 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @api public
   # @return [Array<Puppet::Provider>] providers generated from existing yum
   #   repository definitions.
-  def self.instances
+  def self.instances(resources = nil)
     instances = []
 
-    virtual_inifile.each_section do |section|
+    virtual_inifile(resources).each_section do |section|
       # Ignore the 'main' section in yum.conf since it's not a repository.
       next if section.name == 'main'
 
@@ -111,7 +111,7 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
   # @param resources [Array<Puppet::Type::Yumrepo>] Resources to prefetch.
   # @return [void]
   def self.prefetch(resources)
-    repos = instances
+    repos = instances(resources)
     resources.each_key do |name|
       provider = repos.find { |repo| repo.name == name }
       if provider
@@ -182,14 +182,27 @@ Puppet::Type.type(:yumrepo).provide(:inifile) do
 
   # Build a virtual inifile by reading in numerous .repo files into a single
   # virtual file to ease manipulation.
+  # Will skip any inifile that is found to be currently managed as a file resource
+  # in the catalog.
   # @api private
   # @return [Puppet::Provider::Yumrepo::IniConfig::File] The virtual inifile representing
   #   multiple real files.
-  def self.virtual_inifile
+  def self.virtual_inifile(resources = nil)
+    current_yumrepo_inis = []
+    resources&.each do |key|
+      current_yumrepo_inis << key[1]
+    end
+
     unless @virtual
       @virtual = Puppet::Provider::Yumrepo::IniConfig::File.new
       repofiles.each do |file|
-        @virtual.read(file) if Puppet::FileSystem.file?(file)
+        index_virtual = true
+        unless current_yumrepo_inis.empty?
+          current_yumrepo_inis.each do |index|
+            index_virtual = false if index.catalog.resource('File', file)
+          end
+        end
+        @virtual.read(file) if Puppet::FileSystem.file?(file) && index_virtual
       end
     end
     @virtual
