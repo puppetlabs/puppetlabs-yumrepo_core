@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [Unreleased]
+## [v3.1.0](https://github.com/puppetlabs/puppetlabs-yumrepo_core/tree/v3.1.0) - 2026-09-29
 
-### Added
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-yumrepo_core/compare/v3.0.1...v3.1.0)
 
-- (PA-9117) Add support for Puppet 9
+### Other
+
+- (PA-9117) Add Puppet 9 support [#88](https://github.com/puppetlabs/puppetlabs-yumrepo_core/pull/88) ([tvpartytonight](https://github.com/tvpartytonight))
+- (PA-8446) Inherit secrets in nightly tests [#87](https://github.com/puppetlabs/puppetlabs-yumrepo_core/pull/87) ([mhashizume](https://github.com/mhashizume))
 
 ## [v3.0.1](https://github.com/puppetlabs/puppetlabs-yumrepo_core/tree/v3.0.1) - 2025-11-26
 
